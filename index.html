@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="RATE FLOW - 글로벌 환율 흐름과 환전을 한 화면에서 확인하는 환율 대시보드">
+  <title>RATE FLOW · Global Currency Dashboard</title>
+  <link rel="preconnect" href="https://open.er-api.com">
+  <link rel="preconnect" href="https://api.frankfurter.dev">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="RATE FLOW 홈">
+        <span class="brand-mark">RF</span>
+        <span class="brand-copy"><strong>RATE FLOW</strong><small>Global Currency Dashboard</small></span>
+      </a>
+      <div class="topbar-actions">
+        <span class="live-chip" id="globalStatus" data-state="loading"><i></i><span id="globalStatusText">데이터 불러오는 중</span></span>
+        <button class="refresh-button" id="refreshBtn" type="button" aria-label="환율 새로고침">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.7-4.4L4 9m0 0V4m0 5h5M4 13a8 8 0 0 0 14.7 4.4L20 15m0 0v5m0-5h-5"/></svg>
+          <span>새로고침</span>
+        </button>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow">GLOBAL MONEY, ONE FLOW</span>
+          <h1>오늘의 환율부터<br><span>내 여행 예산까지.</span></h1>
+          <p>USD·JPY·EUR·GBP의 현재 원화 환율, 시장 추이, 실제 일별 기록과 빠른 환전을 한 화면에서 확인하세요.</p>
+          <div class="hero-badges">
+            <span>API Key 없음</span><span>Asia/Seoul 기준</span><span>실제 공개 데이터</span>
+          </div>
+        </div>
+        <div class="hero-orbit" aria-hidden="true">
+          <div class="orbit-card orbit-main"><small>JPY / KRW</small><strong>¥100</strong><span id="heroJpy">—</span></div>
+          <div class="orbit-card orbit-usd">$</div>
+          <div class="orbit-card orbit-eur">€</div>
+          <div class="orbit-card orbit-gbp">£</div>
+          <div class="orbit-ring ring-one"></div><div class="orbit-ring ring-two"></div>
+        </div>
+        <div class="hero-meta"><span id="todayLabel">—</span><span>Asia/Seoul</span></div>
+      </section>
+
+      <section class="section-block">
+        <div class="section-heading">
+          <div><span class="eyebrow">TODAY'S RATES</span><h2>주요 통화</h2></div>
+          <p>카드를 선택하면 아래 그래프와 상세 정보가 해당 통화로 바뀝니다.</p>
+        </div>
+        <div class="rate-grid" id="rateGrid">
+          <button class="rate-card active" data-currency="USD" type="button" style="--accent:#4f46e5;--accent-soft:#eef2ff">
+            <span class="currency-symbol">$</span><span class="currency-code">USD</span><small>미국 달러 · 1 USD</small>
+            <strong id="rate-USD">—</strong><span class="rate-change neutral" id="change-USD">비교 기록 확인 중</span>
+          </button>
+          <button class="rate-card" data-currency="JPY" type="button" style="--accent:#0ea5e9;--accent-soft:#e0f2fe">
+            <span class="currency-symbol">¥</span><span class="currency-code">JPY</span><small>일본 엔 · 100 JPY</small>
+            <strong id="rate-JPY">—</strong><span class="rate-change neutral" id="change-JPY">비교 기록 확인 중</span>
+          </button>
+          <button class="rate-card" data-currency="EUR" type="button" style="--accent:#8b5cf6;--accent-soft:#f3e8ff">
+            <span class="currency-symbol">€</span><span class="currency-code">EUR</span><small>유로 · 1 EUR</small>
+            <strong id="rate-EUR">—</strong><span class="rate-change neutral" id="change-EUR">비교 기록 확인 중</span>
+          </button>
+          <button class="rate-card" data-currency="GBP" type="button" style="--accent:#ec4899;--accent-soft:#fce7f3">
+            <span class="currency-symbol">£</span><span class="currency-code">GBP</span><small>영국 파운드 · 1 GBP</small>
+            <strong id="rate-GBP">—</strong><span class="rate-change neutral" id="change-GBP">비교 기록 확인 중</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="main-grid">
+        <article class="panel trend-panel">
+          <div class="panel-head">
+            <div><span class="panel-kicker">MARKET TREND</span><h2 id="trendTitle">USD / KRW</h2><p id="trendSubtitle">최근 시장 환율 흐름</p></div>
+            <div class="range-tabs"><button class="range-tab active" data-days="7" type="button">7D</button><button class="range-tab" data-days="30" type="button">30D</button></div>
+          </div>
+          <div class="trend-summary">
+            <div class="metric primary"><span>현재 환율</span><strong id="selectedRate">—</strong></div>
+            <div class="metric"><span>내 이전 기록 대비</span><strong id="selectedChange">—</strong><small id="selectedChangeHint">실제 KST 일별 기록 기준</small></div>
+            <div class="metric"><span>원천 관측 시각</span><strong id="sourceObservedAtShort">—</strong><small>RFC 3339 저장</small></div>
+          </div>
+          <div class="chart-wrap" id="chartWrap">
+            <svg id="rateChart" viewBox="0 0 800 300" role="img" aria-label="선택 통화 환율 추이 그래프"></svg>
+            <div class="chart-tooltip" id="chartTooltip" hidden></div>
+            <div class="chart-loading" id="chartLoading">시장 추이를 불러오는 중...</div>
+          </div>
+          <div class="chart-footer"><span>그래프: Frankfurter 공개 시장 데이터</span><span>공휴일·주말은 최근 영업일 값이 이어질 수 있습니다.</span></div>
+        </article>
+
+        <article class="panel converter-panel">
+          <div class="panel-head"><div><span class="panel-kicker">QUICK CONVERT</span><h2>빠른 환전</h2><p>현재 공개 환율 기준 · 수수료/스프레드 미포함</p></div></div>
+          <div class="converter-shell">
+            <label class="money-field"><span>보내는 금액</span><div><select id="fromCurrency"><option value="KRW">KRW · 원</option><option value="USD">USD · 달러</option><option value="JPY">JPY · 엔</option><option value="EUR">EUR · 유로</option><option value="GBP">GBP · 파운드</option></select><input id="fromAmount" type="number" min="0" step="any" value="1000000"></div></label>
+            <button class="swap-button" id="swapBtn" type="button" aria-label="통화 바꾸기"><svg viewBox="0 0 24 24"><path d="M7 7h11l-3-3m3 3-3 3M17 17H6l3 3m-3-3 3-3"/></svg></button>
+            <label class="money-field result-field"><span>받는 금액</span><div><select id="toCurrency"><option value="JPY">JPY · 엔</option><option value="KRW">KRW · 원</option><option value="USD">USD · 달러</option><option value="EUR">EUR · 유로</option><option value="GBP">GBP · 파운드</option></select><output id="toAmount">—</output></div></label>
+          </div>
+          <div class="applied-rate" id="appliedRate">환율 데이터를 기다리는 중입니다.</div>
+          <div class="travel-guide"><div class="travel-head"><span class="travel-symbol" id="guideSymbol">¥</span><div><strong id="guideTitle">일본 엔 빠른 금액표</strong><small>현재 환율 기준 원화 환산</small></div></div><div class="quick-money-grid" id="quickMoneyGrid"></div></div>
+        </article>
+      </section>
+
+      <section class="records-layout">
+        <article class="panel snapshot-panel">
+          <div class="panel-head"><div><span class="panel-kicker">DAILY SNAPSHOT</span><h2>실제 KST 일별 기록</h2><p>같은 날짜에는 하나만 유지하고, 다음 날짜에는 새 기록을 추가합니다.</p></div><span class="count-badge" id="snapshotCount">0일</span></div>
+          <div class="snapshot-compare" id="snapshotCompare">
+            <div><span>비교 상태</span><strong>첫 실제 기록을 기다리는 중</strong><small>서로 다른 KST 날짜의 실제 조회 2건이 필요합니다.</small></div>
+          </div>
+          <div class="records" id="recordsList"><div class="empty-state">정상 조회가 완료되면 오늘 기록이 저장됩니다.</div></div>
+          <div class="records-footer" id="recordsFooter" hidden>
+            <span id="recordsSummary">최근 기록을 표시합니다.</span>
+            <button type="button" class="history-button" id="openHistoryBtn">전체 기록 보기</button>
+          </div>
+        </article>
+
+        <article class="panel source-panel">
+          <div class="panel-head"><div><span class="panel-kicker">DATA PROVENANCE</span><h2>원천과 상태</h2><p>화면값이 어디서 왔는지 그대로 확인할 수 있습니다.</p></div><span class="state-badge loading" id="dataStateBadge">LOADING</span></div>
+          <dl class="source-list">
+            <div><dt>현재 환율 원천</dt><dd><a id="sourceLink" href="https://open.er-api.com/v6/latest/KRW" target="_blank" rel="noopener noreferrer">Open Exchange Rate API</a></dd></div>
+            <div><dt>원천 URL</dt><dd class="mono" id="sourceUrl">—</dd></div>
+            <div><dt>원천 관측 시각</dt><dd id="sourceObservedAt">—</dd></div>
+            <div><dt>조회 시각</dt><dd id="fetchedAt">—</dd></div>
+            <div><dt>기준 시간대</dt><dd>Asia/Seoul (KST)</dd></div>
+            <div><dt>오류 코드</dt><dd class="mono" id="errorCode">none</dd></div>
+          </dl>
+          <div class="source-message" id="sourceMessage">환율 데이터를 불러오고 있습니다.</div>
+        </article>
+      </section>
+
+
+      <div class="history-modal" id="historyModal" hidden aria-hidden="true">
+        <div class="history-modal-backdrop" data-close-history></div>
+        <section class="history-modal-card" role="dialog" aria-modal="true" aria-labelledby="historyModalTitle">
+          <div class="history-modal-head">
+            <div>
+              <span class="panel-kicker">DAILY SNAPSHOT HISTORY</span>
+              <h2 id="historyModalTitle">전체 KST 일별 기록</h2>
+              <p>실제 조회로 저장된 날짜별 기록을 최신순으로 확인합니다.</p>
+            </div>
+            <button type="button" class="history-close" id="closeHistoryBtn" aria-label="전체 기록 닫기">×</button>
+          </div>
+          <div class="history-modal-body" id="historyModalList"></div>
+        </section>
+      </div>
+
+      <section class="test-lab">
+        <details>
+          <summary><span><strong>검증 도구</strong><small>공식 T04 공개 fixture 9종 · 실제 라이브 기록과 완전 분리</small></span><span class="summary-arrow">+</span></summary>
+          <div class="test-content">
+            <div class="test-intro"><div><span class="test-label">OFFICIAL SYNTHETIC REPLAY</span><h3>공식 fixture를 그대로 재생해 저장·실패·복구 상태를 검증합니다.</h3></div><p>Reset은 합성 평가 상태만 지웁니다. 실제 환율 일별 기록은 절대 변경하지 않습니다.</p></div>
+
+            <div class="fixture-package">
+              <div><span>Package</span><strong id="fixturePackageId">확인 중</strong></div>
+              <div><span>Contract</span><strong id="fixtureContractVersion">—</strong></div>
+              <div><span>Integrity</span><strong id="fixtureIntegrity">VERIFYING</strong></div>
+              <div><span>Fixture state</span><strong id="fixtureStateBadge">EMPTY</strong></div>
+            </div>
+
+            <div class="test-sections">
+              <div class="test-group">
+                <span class="test-group-title">정상 저장</span>
+                <button type="button" data-sequence="normal"><strong>D1-A → D1-B → D2</strong><span>100 → 105 → 120 · 행 1 → 1 → 2</span></button>
+              </div>
+              <div class="test-group failures">
+                <span class="test-group-title">실패 5종</span>
+                <button type="button" data-fixture="T04-TIMEOUT"><strong>Slow Response</strong><span>timeout</span></button>
+                <button type="button" data-fixture="T04-AUTH-401"><strong>401 / 403</strong><span>auth</span></button>
+                <button type="button" data-fixture="T04-RATE-429"><strong>Rate Limit</strong><span>rate_limit</span></button>
+                <button type="button" data-fixture="T04-OFFLINE"><strong>Offline</strong><span>offline</span></button>
+                <button type="button" data-fixture="T04-SCHEMA-BREAK"><strong>Schema Changed</strong><span>schema_error</span></button>
+              </div>
+              <div class="test-group recovery">
+                <span class="test-group-title">복구</span>
+                <button type="button" data-sequence="recovery" class="recover"><strong>TIMEOUT → RECOVER-D2</strong><span>stale/timeout → fresh/none</span></button>
+                <button type="button" id="fixtureRetryBtn" class="retry" hidden><strong>다시 시도</strong><span>T04-RECOVER-D2 재생</span></button>
+                <button type="button" id="fixtureResetBtn"><strong>Reset</strong><span>합성 상태만 초기화</span></button>
+              </div>
+            </div>
+
+            <div class="fixture-status-grid">
+              <div><span>현재 값</span><strong id="fixtureCurrentValue">—</strong></div>
+              <div><span>Freshness</span><strong id="fixtureFreshness">—</strong></div>
+              <div><span>Error code</span><strong id="fixtureErrorCode">—</strong></div>
+              <div><span>일별 행</span><strong id="fixtureRowCount">0</strong></div>
+              <div><span>전일 대비</span><strong id="fixtureDelta">—</strong></div>
+              <div><span>마지막 fixture</span><strong id="fixtureLastRun">—</strong></div>
+            </div>
+            <div class="fixture-action" id="fixtureAction">공식 fixture를 선택해 재생하세요.</div>
+            <div class="fixture-records" id="fixtureRecords"><div class="empty-state dark">합성 일별 기록 없음</div></div>
+            <div class="test-result" id="testResult">라이브 환율과 합성 평가 데이터는 서로 분리되어 있습니다.</div>
+          </div>
+        </details>
+      </section>
+    </main>
+
+    <footer><span>RATE FLOW</span><span>Current rates: Open ER API · Trend: Frankfurter · No secret key</span>  <span class="footer-version">RATE FLOW v1.0.0</span>
+    </footer>
+  </div>
+  <script src="script.js" defer></script>
+</body>
+</html>
