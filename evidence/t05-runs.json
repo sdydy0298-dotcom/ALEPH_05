@@ -394,5 +394,295 @@
       "Fixed-rate simulation, not actual bank quotes or production deployment verification."
     ],
     "reproduction": "Fresh directory copy of delivered files; offline DOM adapters retained; no real HTTP/navigation verification."
+  },
+  {
+    "actor": "AI_B",
+    "started_at": "2026-09-27T07:49:46.635852+00:00",
+    "ended_at": "2026-09-27T07:49:55.202687+00:00",
+    "browser": "Chromium 141.0.7390.37",
+    "mode": "offline-dom: real DOM + original JS; mocked fetch/localStorage/WebCrypto adapter",
+    "plan_sha256_normalized_lf": "6ab8d5b4eeb7f4adabcf12b1ffe3ea7f79a14e8b805d1a7e4cc646750919e365",
+    "fixture_rates": {
+      "USD": 0.0007142857142857143,
+      "JPY": 0.10752688172043011,
+      "EUR": 0.000625,
+      "GBP": 0.0005263157894736842
+    },
+    "fixed_cases": [
+      {
+        "id": "TEST-01",
+        "description": "여행 국가 선택",
+        "input": "지원 국가 중 하나 선택",
+        "expected": "선택한 국가에 대응하는 통화와 환율이 적용된다.",
+        "status": "PASS",
+        "observed": "JP/US/FR/DE/ES/GB mapped to JPY/USD/EUR/EUR/EUR/GBP with the matching fixed rates.",
+        "duration_ms": 633
+      },
+      {
+        "id": "TEST-02",
+        "description": "정상 여행 예산 입력",
+        "input": "`1500000`원",
+        "expected": "입력값이 정상적으로 인정되고 계산할 수 있다.",
+        "status": "PASS",
+        "observed": "111,209 JPY",
+        "duration_ms": 290
+      },
+      {
+        "id": "TEST-03",
+        "description": "환전 예정 금액 계산",
+        "input": "예산 `1,500,000원`, 환전 비율 `70%`",
+        "expected": "`1,050,000원`",
+        "status": "PASS",
+        "observed": "1,050,000 KRW",
+        "duration_ms": 139
+      },
+      {
+        "id": "TEST-04",
+        "description": "예상 수수료 계산",
+        "input": "환전 예정 금액 `1,050,000원`, 수수료율 `1.5%`",
+        "expected": "`15,750원`",
+        "status": "PASS",
+        "observed": "15,750 KRW",
+        "duration_ms": 133
+      },
+      {
+        "id": "TEST-05",
+        "description": "실제 환전 금액 계산",
+        "input": "환전 예정 금액 `1,050,000원`, 수수료 `15,750원`",
+        "expected": "`1,034,250원`",
+        "status": "PASS",
+        "observed": "1,034,250 KRW",
+        "duration_ms": 203
+      },
+      {
+        "id": "TEST-06",
+        "description": "예상 외화 수령액 계산",
+        "input": "실제 환전 금액 `1,034,250원`, `100 JPY = 930원`",
+        "expected": "약 `111,209 JPY`",
+        "status": "PASS",
+        "observed": "111,209 JPY (unrounded: 111209.67741935483)",
+        "duration_ms": 194
+      },
+      {
+        "id": "TEST-07",
+        "description": "국가 변경",
+        "input": "계산 후 다른 여행 국가 선택",
+        "expected": "변경한 국가의 통화와 환율로 다시 계산된다.",
+        "status": "PASS",
+        "observed": "111,209 JPY -> 738.75 USD",
+        "duration_ms": 220
+      },
+      {
+        "id": "TEST-08",
+        "description": "잘못된 여행 예산",
+        "input": "`0`, 음수, 숫자가 아닌 값",
+        "expected": "정상 계산하지 않고 안내를 표시한다.",
+        "status": "PASS",
+        "observed": "0 / -1 / abc: error visible, all previous result amounts cleared.",
+        "duration_ms": 520
+      },
+      {
+        "id": "TEST-09",
+        "description": "잘못된 환전 비율",
+        "input": "`-1%`, `101%`",
+        "expected": "0~100% 범위를 벗어난 값을 정상 계산하지 않는다.",
+        "status": "PASS",
+        "observed": "-1 / 101: error visible, all previous result amounts cleared.",
+        "duration_ms": 254
+      },
+      {
+        "id": "TEST-10",
+        "description": "초기화",
+        "input": "값 입력 및 계산 후 초기화",
+        "expected": "입력값과 계산 결과가 초기 상태로 돌아간다.",
+        "status": "PASS",
+        "observed": "Initial form state restored: [\"JP\", \"\", \"70\", \"1.5\"]; results cleared; no error.",
+        "duration_ms": 309
+      }
+    ],
+    "passed": 10,
+    "failed": 0,
+    "error_round": false,
+    "supplemental": [
+      {
+        "check": "Fee invalid input and 0/100 boundaries",
+        "status": "PASS"
+      },
+      {
+        "check": "Budget malformed/overflow and ratio 0/100 boundaries",
+        "status": "PASS"
+      },
+      {
+        "check": "Original quick converter, swap and currency card",
+        "status": "PASS"
+      },
+      {
+        "check": "Original T04 browser asset integrity",
+        "status": "PASS"
+      },
+      {
+        "check": "T04 normal fixture sequence and reset isolation",
+        "status": "PASS"
+      },
+      {
+        "check": "Refresh failure keeps a labeled last-good planner rate",
+        "status": "PASS"
+      },
+      {
+        "check": "Responsive 1920/1366/768/390/320 and error-state screenshots",
+        "status": "PASS"
+      },
+      {
+        "check": "No uncaught browser JavaScript errors",
+        "status": "PASS"
+      }
+    ],
+    "console_errors": [],
+    "limitations": [
+      "Fixed-rate simulation, not actual bank quotes or production deployment verification."
+    ]
+  },
+  {
+    "actor": "AI_B",
+    "started_at": "2026-09-27T07:49:58.937743+00:00",
+    "ended_at": "2026-09-27T07:50:07.342611+00:00",
+    "browser": "Chromium 141.0.7390.37",
+    "mode": "http-server: real DOM + original JS + native storage; mocked external API responses",
+    "plan_sha256_normalized_lf": "6ab8d5b4eeb7f4adabcf12b1ffe3ea7f79a14e8b805d1a7e4cc646750919e365",
+    "fixture_rates": {
+      "USD": 0.0007142857142857143,
+      "JPY": 0.10752688172043011,
+      "EUR": 0.000625,
+      "GBP": 0.0005263157894736842
+    },
+    "fixed_cases": [
+      {
+        "id": "TEST-01",
+        "description": "여행 국가 선택",
+        "input": "지원 국가 중 하나 선택",
+        "expected": "선택한 국가에 대응하는 통화와 환율이 적용된다.",
+        "status": "PASS",
+        "observed": "JP/US/FR/DE/ES/GB mapped to JPY/USD/EUR/EUR/EUR/GBP with the matching fixed rates.",
+        "duration_ms": 201
+      },
+      {
+        "id": "TEST-02",
+        "description": "정상 여행 예산 입력",
+        "input": "`1500000`원",
+        "expected": "입력값이 정상적으로 인정되고 계산할 수 있다.",
+        "status": "PASS",
+        "observed": "111,209 JPY",
+        "duration_ms": 294
+      },
+      {
+        "id": "TEST-03",
+        "description": "환전 예정 금액 계산",
+        "input": "예산 `1,500,000원`, 환전 비율 `70%`",
+        "expected": "`1,050,000원`",
+        "status": "PASS",
+        "observed": "1,050,000 KRW",
+        "duration_ms": 150
+      },
+      {
+        "id": "TEST-04",
+        "description": "예상 수수료 계산",
+        "input": "환전 예정 금액 `1,050,000원`, 수수료율 `1.5%`",
+        "expected": "`15,750원`",
+        "status": "PASS",
+        "observed": "15,750 KRW",
+        "duration_ms": 105
+      },
+      {
+        "id": "TEST-05",
+        "description": "실제 환전 금액 계산",
+        "input": "환전 예정 금액 `1,050,000원`, 수수료 `15,750원`",
+        "expected": "`1,034,250원`",
+        "status": "PASS",
+        "observed": "1,034,250 KRW",
+        "duration_ms": 122
+      },
+      {
+        "id": "TEST-06",
+        "description": "예상 외화 수령액 계산",
+        "input": "실제 환전 금액 `1,034,250원`, `100 JPY = 930원`",
+        "expected": "약 `111,209 JPY`",
+        "status": "PASS",
+        "observed": "111,209 JPY (unrounded: 111209.67741935483)",
+        "duration_ms": 194
+      },
+      {
+        "id": "TEST-07",
+        "description": "국가 변경",
+        "input": "계산 후 다른 여행 국가 선택",
+        "expected": "변경한 국가의 통화와 환율로 다시 계산된다.",
+        "status": "PASS",
+        "observed": "111,209 JPY -> 738.75 USD",
+        "duration_ms": 132
+      },
+      {
+        "id": "TEST-08",
+        "description": "잘못된 여행 예산",
+        "input": "`0`, 음수, 숫자가 아닌 값",
+        "expected": "정상 계산하지 않고 안내를 표시한다.",
+        "status": "PASS",
+        "observed": "0 / -1 / abc: error visible, all previous result amounts cleared.",
+        "duration_ms": 454
+      },
+      {
+        "id": "TEST-09",
+        "description": "잘못된 환전 비율",
+        "input": "`-1%`, `101%`",
+        "expected": "0~100% 범위를 벗어난 값을 정상 계산하지 않는다.",
+        "status": "PASS",
+        "observed": "-1 / 101: error visible, all previous result amounts cleared.",
+        "duration_ms": 284
+      },
+      {
+        "id": "TEST-10",
+        "description": "초기화",
+        "input": "값 입력 및 계산 후 초기화",
+        "expected": "입력값과 계산 결과가 초기 상태로 돌아간다.",
+        "status": "PASS",
+        "observed": "Initial form state restored: [\"JP\", \"\", \"70\", \"1.5\"]; results cleared; no error.",
+        "duration_ms": 286
+      }
+    ],
+    "passed": 10,
+    "failed": 0,
+    "error_round": false,
+    "supplemental": [
+      {
+        "check": "Fee invalid input and 0/100 boundaries",
+        "status": "PASS"
+      },
+      {
+        "check": "Budget malformed/overflow and ratio 0/100 boundaries",
+        "status": "PASS"
+      },
+      {
+        "check": "Original quick converter, swap and currency card",
+        "status": "PASS"
+      },
+      {
+        "check": "Original T04 browser asset integrity",
+        "status": "PASS"
+      },
+      {
+        "check": "T04 normal fixture sequence and reset isolation",
+        "status": "PASS"
+      },
+      {
+        "check": "Responsive 1920/1366/768/390/320 and error-state screenshots",
+        "status": "PASS"
+      },
+      {
+        "check": "No uncaught browser JavaScript errors",
+        "status": "PASS"
+      }
+    ],
+    "console_errors": [],
+    "limitations": [
+      "Fixed-rate simulation, not actual bank quotes or production deployment verification."
+    ]
   }
 ]

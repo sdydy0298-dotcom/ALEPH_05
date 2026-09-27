@@ -4,7 +4,7 @@
 
 ## v1.2.0 — 여행 예산 환전 계산 (AI A)
 
-T04 v1.1.0의 기존 대시보드를 유지하고, 빠른 환전 아래에 여행 예산 계산 영역을 추가했습니다. 이 상태는 AI A의 결과이며, AI B 검증과 최종 비교는 아직 진행하지 않았습니다.
+T04 v1.1.0의 기존 대시보드를 유지하고, 빠른 환전 아래에 여행 예산 계산 영역을 추가했습니다. 이 구현은 AI A의 결과이며, AI B가 별도 환경에서 독립 재현·검증했습니다(아래 "AI B 검증" 참고). 이름을 가린 최종 비교는 아직 진행하지 않았습니다.
 
 | 입력 | 기준 |
 | --- | --- |
@@ -54,6 +54,18 @@ python tools/test_t05.py --offline-dom --browser /usr/bin/chromium --actor AI_A
 ```
 
 최종 검사는 **10/10 PASS**입니다. 초기화 이벤트 순서 결함을 발견하여 수정했으며, 이전 FAIL·중단 기록도 남겼습니다. 상세 내용은 `T05_RESULT.md`와 `evidence/t05-runs.json`을 확인하세요.
+
+### AI B 검증
+
+AI B는 애플리케이션 소스(`index.html`/`script.js`/`style.css`)를 변경하지 않았습니다. 두 가지 방식으로 동일한 TEST-01~TEST-10과 보조 검증을 각각 실행해 모두 PASS를 확인했습니다.
+
+```bash
+python tools/test_t05.py --offline-dom --actor AI_B   # A와 동일한 메모리 어댑터 모드
+python tools/test_t05.py --actor AI_B                 # 실제 http.server + 네이티브 localStorage, 외부 API만 고정 응답
+python tools/verify-official-assets.py
+```
+
+실제 HTTP 서버 모드는 페이지 내비게이션과 브라우저 저장소를 실제로 사용하므로, A가 미확인으로 남긴 "실제 브라우저 저장 지속성"을 이 범위에서 재확인한 것입니다. 다만 이 환경도 외부 인터넷 접속은 차단되어 있어, 실제 공개 배포 URL과 실제 라이브 환율 원천 접속은 여전히 미확인입니다. 상세 결과는 `T05_RESULT.md` 6번 항목과 `evidence/t05-runs.json`을 확인하세요.
 
 ### 인수인계 준비
 
