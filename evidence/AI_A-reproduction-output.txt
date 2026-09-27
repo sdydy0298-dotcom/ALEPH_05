@@ -1,0 +1,49 @@
+TEST-01 PASS JP/US/FR/DE/ES/GB mapped to JPY/USD/EUR/EUR/EUR/GBP with the matching fixed rates.
+TEST-02 PASS 111,209 JPY
+TEST-03 PASS 1,050,000 KRW
+TEST-04 PASS 15,750 KRW
+TEST-05 PASS 1,034,250 KRW
+TEST-06 PASS 111,209 JPY (unrounded: 111209.67741935483)
+TEST-07 PASS 111,209 JPY -> 738.75 USD
+TEST-08 PASS 0 / -1 / abc: error visible, all previous result amounts cleared.
+TEST-09 PASS -1 / 101: error visible, all previous result amounts cleared.
+TEST-10 PASS Initial form state restored: ["JP", "", "70", "1.5"]; results cleared; no error.
+{
+  "passed": 10,
+  "failed": 0,
+  "error_round": false,
+  "supplemental": [
+    {
+      "check": "Fee invalid input and 0/100 boundaries",
+      "status": "PASS"
+    },
+    {
+      "check": "Budget malformed/overflow and ratio 0/100 boundaries",
+      "status": "PASS"
+    },
+    {
+      "check": "Original quick converter, swap and currency card",
+      "status": "PASS"
+    },
+    {
+      "check": "Original T04 browser asset integrity",
+      "status": "PASS"
+    },
+    {
+      "check": "T04 normal fixture sequence and reset isolation",
+      "status": "PASS"
+    },
+    {
+      "check": "Refresh failure keeps a labeled last-good planner rate",
+      "status": "PASS"
+    },
+    {
+      "check": "Responsive 1920/1366/768/390/320 and error-state screenshots",
+      "status": "PASS"
+    },
+    {
+      "check": "No uncaught browser JavaScript errors",
+      "status": "PASS"
+    }
+  ]
+}

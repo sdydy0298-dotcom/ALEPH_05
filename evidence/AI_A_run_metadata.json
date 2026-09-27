@@ -1,0 +1,20 @@
+{
+  "actor": "AI A",
+  "request_no": 1,
+  "start_source_commit": "2b1612fa08ed60cd7d92174cd4fb3a3440c723fc",
+  "start_observed_at": "2026-09-27T16:17:22+09:00",
+  "end_observed_at": "2026-09-27T16:32:24+09:00",
+  "observed_elapsed_seconds": 902,
+  "clock_source": "web.time(UTC+09:00), independently matching the container UTC clock at start",
+  "timestamp_limitation": "Actual chat request transmission and final response delivery timestamps are unavailable. These are observed processing-time endpoints, not asserted exact message timestamps. End sampled just before final packaging.",
+  "service": "ChatGPT",
+  "model_identity": "GPT-6 Astra Pro",
+  "backend_version_id": null,
+  "requests_used": 1,
+  "known_failure_rounds": 1,
+  "unknown_result_aborted_attempts": 1,
+  "latest_fixed_passes": 10,
+  "total_fixed_cases": 10,
+  "github_end_commit": "pending student commit; never invented",
+  "live_deployment_verified": false
+}

@@ -1,0 +1,45 @@
+{
+  "a_start_commit": "2b1612fa08ed60cd7d92174cd4fb3a3440c723fc",
+  "hash_rule": "SHA-256 of bytes after CRLF to LF normalization; no other transformation",
+  "source_paths_for_diff": [
+    "index.html",
+    "style.css",
+    "script.js",
+    "tools/test_t05.py",
+    "tools/finalize_handoff.py"
+  ],
+  "files": [
+    {
+      "path": "index.html",
+      "sha256_lf": "f3db092806c35d24cd99cbbe0f3b2c7f99ec499a1d9b33cd538f7ad02ddef823"
+    },
+    {
+      "path": "style.css",
+      "sha256_lf": "13287554ebecc09f62dc806a0fdc5c953a48a0eab27a1eccfc1bbdf139b0a0de"
+    },
+    {
+      "path": "script.js",
+      "sha256_lf": "0aa0eeda9343517450d7ebb7b48a692f4aaabaa094215ce560ef434e467259fc"
+    },
+    {
+      "path": "README.md",
+      "sha256_lf": "6fb56a6f84c1eea414c710971a1eeccbb0e6ae84801757f2dcfc8b5389d7e989"
+    },
+    {
+      "path": "T05_EXPERIMENT_PLAN.md",
+      "sha256_lf": "6ab8d5b4eeb7f4adabcf12b1ffe3ea7f79a14e8b805d1a7e4cc646750919e365"
+    },
+    {
+      "path": "tools/test_t05.py",
+      "sha256_lf": "8371386e0d93dafe1b296f8e4e9e358bddbea8aa6d51797fb550ba4885690375"
+    },
+    {
+      "path": "tools/finalize_handoff.py",
+      "sha256_lf": "ea78ba138457dded86f8a6f2587417199d57a8f1b3a2e8dd361899ff569a60fd"
+    },
+    {
+      "path": "tests/t05-fixed-tests.json",
+      "sha256_lf": "72633a3b58783ec422d29d90a9d775d45d319f11914115f6e2ce493329e93fa0"
+    }
+  ]
+}

@@ -314,6 +314,7 @@ function liveErrorInfo(error) {
 
 function setStatus(status, info = null) {
   state.status = status;
+  renderTravelPlanner();
   const fresh = status === "fresh";
   const stale = status === "stale";
   el("globalStatus").dataset.state = fresh ? "fresh" : stale ? "stale" : "loading";
@@ -351,6 +352,122 @@ function renderConverter() {
   el("appliedRate").textContent = Number.isFinite(one)
     ? `1 ${from} = ${one.toLocaleString("ko-KR", { maximumFractionDigits: 6 })} ${to} · 현재 공개 원천 기준 · 수수료/스프레드 미포함`
     : "환율 데이터를 기다리는 중입니다.";
+}
+
+
+/* ---------- T05 travel budget planner ---------- */
+const TRAVEL_COUNTRIES = Object.freeze({ JP: "JPY", US: "USD", FR: "EUR", DE: "EUR", ES: "EUR", GB: "GBP" });
+let travelTouched = false;
+
+// Accept decimal input and correctly grouped thousands, never silently coerce invalid text.
+function parseTravelNumber(raw) {
+  const text = String(raw ?? "").trim();
+  if (!/^(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d+)?$/.test(text)) return NaN;
+  const value = Number(text.replaceAll(",", ""));
+  return Number.isFinite(value) ? value : NaN;
+}
+
+// The API stores foreign units / 1 KRW. Normalize once to KRW / 1 foreign unit.
+// Pure calculation: no DOM, storage writes, API calls, or intermediate rounding.
+function calculateTravelBudget({ budget, ratio, fee, currency, krwPerUnit }) {
+  if (!Number.isFinite(budget) || budget <= 0 || budget > Number.MAX_SAFE_INTEGER) throw new RangeError("budget");
+  if (!Number.isFinite(ratio) || ratio < 0 || ratio > 100) throw new RangeError("ratio");
+  if (!Number.isFinite(fee) || fee < 0 || fee > 100) throw new RangeError("fee");
+  if (!TRACKED.includes(currency) || !Number.isFinite(krwPerUnit) || krwPerUnit <= 0) throw new RangeError("rate");
+  const exchange = budget * (ratio / 100);
+  const charge = exchange * (fee / 100);
+  const net = exchange - charge;
+  const received = net / krwPerUnit;
+  if (![exchange, charge, net, received].every(Number.isFinite) || received > Number.MAX_SAFE_INTEGER) throw new RangeError("overflow");
+  return { exchange, charge, net, received, currency, krwPerUnit };
+}
+
+function travelForeignDisplay(value, currency) {
+  const digits = currency === "JPY" ? 0 : 2;
+  const scale = 10 ** digits;
+  // Correct only sub-ULP arithmetic noise; do not round an actual fraction up.
+  const scaled = value * scale;
+  const fixed = Math.floor(scaled + Number.EPSILON * Math.abs(scaled)) / scale;
+  return `${fixed.toLocaleString("ko-KR", { minimumFractionDigits: digits, maximumFractionDigits: digits })} ${currency}`;
+}
+
+function clearTravelResult() {
+  ["travelReceived", "travelExchange", "travelCharge", "travelNet"].forEach(id => { el(id).textContent = "\u2014"; delete el(id).dataset.value; });
+}
+
+function renderTravelPlanner(showErrors = travelTouched) {
+  if (!el("travelForm")) return;
+  const currency = TRAVEL_COUNTRIES[el("travelCountry").value];
+  const rate = currency ? baseToKRW(currency) : null;
+  el("travelCurrency").textContent = currency || "\u2014";
+  const unit = CURRENCIES[currency]?.displayUnit || 1;
+  const hasRate = Number.isFinite(rate) && rate > 0;
+  el("travelAppliedRate").textContent = hasRate
+    ? `${unit} ${currency} = ${(rate * unit).toLocaleString("ko-KR", { maximumFractionDigits: 6 })} KRW`
+    : "\ud658\uc728 \ub370\uc774\ud130\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.";
+  el("travelRateStatus").parentElement.dataset.state = state.status;
+  el("travelRateStatus").textContent = state.status === "fresh"
+    ? `\uacf5\uac1c \uc6d0\ucc9c \uae30\uc900 \u00b7 ${state.observedAt || ""}`
+    : hasRate
+      ? "\ub9c8\uc9c0\ub9c9 \uc815\uc0c1 \ud658\uc728 \uae30\uc900 \u00b7 \ucd5c\uc2e0\uac12\uc774 \uc544\ub2d0 \uc218 \uc788\uc2b5\ub2c8\ub2e4."
+      : "\uc0c1\ub2e8 \uc0c8\ub85c\uace0\uce68\uc73c\ub85c \ud658\uc728\uc744 \ubd88\ub7ec\uc640 \uc8fc\uc138\uc694.";
+
+  const ids = ["travelBudget", "travelRatio", "travelFee"];
+  ids.forEach(id => el(id).removeAttribute("aria-invalid"));
+  const error = el("travelError");
+  error.hidden = true; error.textContent = "";
+  const budget = parseTravelNumber(el("travelBudget").value);
+  const ratio = parseTravelNumber(el("travelRatio").value);
+  const fee = parseTravelNumber(el("travelFee").value);
+  let message = "", invalidId = null;
+  if (!Number.isFinite(budget) || budget <= 0 || budget > Number.MAX_SAFE_INTEGER) {
+    invalidId = "travelBudget"; message = "\uc5ec\ud589 \uc608\uc0b0\uc740 0\ubcf4\ub2e4 \ud070 \uc22b\uc790\ub85c \uc785\ub825\ud574 \uc8fc\uc138\uc694. (\ucd5c\ub300 9,007,199,254,740,991 KRW)";
+  } else if (!Number.isFinite(ratio) || ratio < 0 || ratio > 100) {
+    invalidId = "travelRatio"; message = "\ud658\uc804 \ube44\uc728\uc740 0~100% \ubc94\uc704\uc758 \uc22b\uc790\ub85c \uc785\ub825\ud574 \uc8fc\uc138\uc694.";
+  } else if (!Number.isFinite(fee) || fee < 0 || fee > 100) {
+    invalidId = "travelFee"; message = "\uc218\uc218\ub8cc\uc728\uc740 0~100% \ubc94\uc704\uc758 \uc22b\uc790\ub85c \uc785\ub825\ud574 \uc8fc\uc138\uc694.";
+  } else if (!hasRate) {
+    message = "\ud658\uc728\uc744 \ubd88\ub7ec\uc628 \ub4a4 \ub2e4\uc2dc \uacc4\uc0b0\ud574 \uc8fc\uc138\uc694.";
+  }
+  if (message) {
+    clearTravelResult();
+    if (showErrors) { error.textContent = message; error.hidden = false; if (invalidId) el(invalidId).setAttribute("aria-invalid", "true"); }
+    el("travelResultNote").textContent = showErrors ? "\uc785\ub825\uac12\uacfc \ud658\uc728 \uc0c1\ud0dc\ub97c \ud655\uc778\ud574 \uc8fc\uc138\uc694." : "\uc5ec\ud589 \uc608\uc0b0\uc744 \uc785\ub825\ud574 \uc8fc\uc138\uc694.";
+    return false;
+  }
+  try {
+    const result = calculateTravelBudget({ budget, ratio, fee, currency, krwPerUnit: rate });
+    for (const [id, key] of [["travelExchange", "exchange"], ["travelCharge", "charge"], ["travelNet", "net"]]) {
+      el(id).textContent = `${result[key].toLocaleString("ko-KR", { maximumFractionDigits: 2 })} KRW`;
+      el(id).dataset.value = String(result[key]);
+    }
+    el("travelReceived").textContent = travelForeignDisplay(result.received, currency);
+    el("travelReceived").dataset.value = String(result.received);
+    el("travelResultNote").textContent = `${el("travelCountry").selectedOptions[0].textContent} \u00b7 \ud658\uc804 ${ratio}% \u00b7 \uc218\uc218\ub8cc ${fee}%`;
+    return true;
+  } catch {
+    clearTravelResult();
+    error.textContent = "\uacc4\uc0b0 \uac00\ub2a5 \ubc94\uc704\ub97c \ub118\uc5c8\uc2b5\ub2c8\ub2e4. \uae08\uc561\uc744 \uc904\uc5ec \uc8fc\uc138\uc694.";
+    error.hidden = !showErrors;
+    el("travelResultNote").textContent = "\uacc4\uc0b0 \ubd88\uac00";
+    return false;
+  }
+}
+
+function bindTravelPlanner() {
+  el("travelForm").addEventListener("submit", event => {
+    event.preventDefault(); travelTouched = true;
+    if (!renderTravelPlanner(true)) el("travelForm").querySelector('[aria-invalid="true"]')?.focus();
+  });
+  ["travelBudget", "travelRatio", "travelFee"].forEach(id => el(id).addEventListener("input", () => {
+    travelTouched = true; renderTravelPlanner();
+  }));
+  el("travelCountry").addEventListener("change", () => renderTravelPlanner());
+  el("travelForm").addEventListener("reset", () => {
+    // The default form reset runs after the reset event handlers.
+    setTimeout(() => { travelTouched = false; renderTravelPlanner(false); }, 0);
+  });
+  renderTravelPlanner(false);
 }
 
 function renderTravelGuide() {
@@ -881,6 +998,7 @@ async function init() {
   renderSnapshots();
   renderFixtureState();
   bindEvents();
+  bindTravelPlanner();
   verifyOfficialPackage();
   refreshAll();
 }

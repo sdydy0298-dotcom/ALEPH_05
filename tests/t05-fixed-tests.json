@@ -1,0 +1,66 @@
+{
+  "source": "T05_EXPERIMENT_PLAN.md, section 3",
+  "plan_sha256_lf": "6ab8d5b4eeb7f4adabcf12b1ffe3ea7f79a14e8b805d1a7e4cc646750919e365",
+  "cases": [
+    {
+      "id": "TEST-01",
+      "description": "여행 국가 선택",
+      "input": "지원 국가 중 하나 선택",
+      "expected": "선택한 국가에 대응하는 통화와 환율이 적용된다."
+    },
+    {
+      "id": "TEST-02",
+      "description": "정상 여행 예산 입력",
+      "input": "`1500000`원",
+      "expected": "입력값이 정상적으로 인정되고 계산할 수 있다."
+    },
+    {
+      "id": "TEST-03",
+      "description": "환전 예정 금액 계산",
+      "input": "예산 `1,500,000원`, 환전 비율 `70%`",
+      "expected": "`1,050,000원`"
+    },
+    {
+      "id": "TEST-04",
+      "description": "예상 수수료 계산",
+      "input": "환전 예정 금액 `1,050,000원`, 수수료율 `1.5%`",
+      "expected": "`15,750원`"
+    },
+    {
+      "id": "TEST-05",
+      "description": "실제 환전 금액 계산",
+      "input": "환전 예정 금액 `1,050,000원`, 수수료 `15,750원`",
+      "expected": "`1,034,250원`"
+    },
+    {
+      "id": "TEST-06",
+      "description": "예상 외화 수령액 계산",
+      "input": "실제 환전 금액 `1,034,250원`, `100 JPY = 930원`",
+      "expected": "약 `111,209 JPY`"
+    },
+    {
+      "id": "TEST-07",
+      "description": "국가 변경",
+      "input": "계산 후 다른 여행 국가 선택",
+      "expected": "변경한 국가의 통화와 환율로 다시 계산된다."
+    },
+    {
+      "id": "TEST-08",
+      "description": "잘못된 여행 예산",
+      "input": "`0`, 음수, 숫자가 아닌 값",
+      "expected": "정상 계산하지 않고 안내를 표시한다."
+    },
+    {
+      "id": "TEST-09",
+      "description": "잘못된 환전 비율",
+      "input": "`-1%`, `101%`",
+      "expected": "0~100% 범위를 벗어난 값을 정상 계산하지 않는다."
+    },
+    {
+      "id": "TEST-10",
+      "description": "초기화",
+      "input": "값 입력 및 계산 후 초기화",
+      "expected": "입력값과 계산 결과가 초기 상태로 돌아간다."
+    }
+  ]
+}

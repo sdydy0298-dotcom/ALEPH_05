@@ -1,3 +1,70 @@
+# RATE FLOW v1.2.0 · T05
+
+> T05 · 대화가 끊겨도 이어지는 프로젝트
+
+## v1.2.0 — 여행 예산 환전 계산 (AI A)
+
+T04 v1.1.0의 기존 대시보드를 유지하고, 빠른 환전 아래에 여행 예산 계산 영역을 추가했습니다. 이 상태는 AI A의 결과이며, AI B 검증과 최종 비교는 아직 진행하지 않았습니다.
+
+| 입력 | 기준 |
+| --- | --- |
+| 여행 국가 | 일본 / 미국 / 프랑스 / 독일 / 스페인 / 영국 |
+| 여행 예산 | KRW, 0보다 큰 숫자; 올바른 세 자리 쉼표 구분 허용 |
+| 환전 비율 | 0~100%; 초기값 70% |
+| 수수료율 | 0~100%; 초기값 1.5%, 은행의 실제 수수료가 아닌 계산용 가정 |
+
+입력값이 바뀌면 즉시 다시 계산합니다. 잘못된 입력은 안내하고 이전 결과를 지웁니다. 초기화하면 일본, 빈 예산, 70%, 1.5%로 돌아가고 결과는 비워집니다.
+
+### 계산식
+
+```text
+exchange = budgetKRW * (ratioPercent / 100)
+charge   = exchange * (feePercent / 100)
+net      = exchange - charge
+received = net / krwPerOneForeignUnit
+```
+
+기존 API의 응답은 `외화 / 1 KRW`이므로, 역수로 `KRW / 외화 1단위`를 구합니다. JPY는 화면에서만 100단위로 표시합니다. 중간 계산은 반올림하지 않고, 외화 최종 표시는 JPY 1엔 / 기타 0.01단위로 버림합니다.
+
+TEST-06의 고정 검사 입력 `100 JPY = 930 KRW`에서 `1,034,250 / 9.3 = 111,209.677419... JPY`, 화면에는 `111,209 JPY`를 표시합니다. 이 환율은 검사용이며 현재 실제 환율이 아닙니다.
+
+### 실행
+
+```bash
+python -m http.server 8080
+```
+
+`http://localhost:8080/#travelPlanner`에서 새 기능을 확인합니다. 새로운 백엔드나 API 키는 필요하지 않습니다. 기존 환율을 공유하며, 새 계산기는 별도 API 요청을 발생시키지 않습니다.
+
+### 고정 검사 10개 재현
+
+```bash
+python -m pip install playwright
+python -m playwright install chromium
+python tools/test_t05.py --actor AI_B
+python tools/verify-official-assets.py
+```
+
+검사 스크립트는 자체 HTTP 서버를 열고 외부 환율 API만 고정 응답으로 대체합니다. 시험된 기준은 `T05_EXPERIMENT_PLAN.md`의 원문과 SHA-256으로 대조하며, 검사와 기대값을 바꾸지 않습니다.
+
+AI A의 검증 환경은 URL 이동이 차단되어 아래 오프라인 모드로 실행했습니다. 실제 Chromium에서 원본 HTML/CSS/JS를 실행하되, fetch/localStorage/WebCrypto를 메모리 어댑터로 제공합니다. 따라서 실제 네트워크·HTTP 서버·저장 지속성을 검증한 것은 아닙니다.
+
+```bash
+python tools/test_t05.py --offline-dom --browser /usr/bin/chromium --actor AI_A
+```
+
+최종 검사는 **10/10 PASS**입니다. 초기화 이벤트 순서 결함을 발견하여 수정했으며, 이전 FAIL·중단 기록도 남겼습니다. 상세 내용은 `T05_RESULT.md`와 `evidence/t05-runs.json`을 확인하세요.
+
+### 인수인계 준비
+
+`HANDOFF.md`는 일곱 칸의 인수인계서입니다. 산출물을 커밋한 뒤 `python tools/finalize_handoff.py`를 실행하면, 실제 커밋된 소스를 검증하고 A 종료 Full Commit ID를 문서에 채웁니다. 시작할 때의 PLAN과 고정 검사는 수정하지 않습니다.
+
+변경된 문서를 따로 커밋하여 푸시한 뒤 AI B에게 전달하세요. 인수인계서가 가리키는 소스 커밋은 문서를 담은 다음 커밋이 아니라, 검증한 A 소스 커밋입니다. B는 자신이 실제로 시작한 HEAD를 별도 기록합니다.
+
+---
+
+## 기존 T04 v1.1.0 설명 (보존)
+
 # RATE FLOW v1.1.0
 
 > T04 · 오늘의 진짜 정보판 — 데이터가 안 올 때

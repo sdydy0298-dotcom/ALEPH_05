@@ -1,0 +1,3 @@
+First attempt (exact per-case results/timestamps unavailable): first harness run was terminated at 90 seconds. stdout was buffered and no individual results were recovered; this attempt cannot be assigned PASS/FAIL.
+Next attempt (see the captured run start in t05-runs.json): next run recorded TEST-03/05/07 FAIL (reset wait timeout), then hit the execution limit. Its partial results are preserved in t05-runs.json.
+Fix: defer render after native form reset with setTimeout(0), not queueMicrotask. This is an actual defect found in AI A work, not an intentionally left failure.
