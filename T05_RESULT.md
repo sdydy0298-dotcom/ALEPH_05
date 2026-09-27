@@ -91,6 +91,7 @@ Browser: `Chromium 144.0.7559.96`; Python Playwright: `1.57.0`.
 | 서비스 / 모델 | Claude (Anthropic) / Claude Sonnet 5 (채팅 인터페이스 표시명; 백엔드 세부 버전 ID는 독립 미확인) |
 | 시작 Full Commit | `1c3a36ec8ae242e454f7266fc22351101bfac41a` (A의 문서화 커밋; `git rev-parse HEAD`로 확인) |
 | 종료 소스 Full Commit | A와 동일 `5cc2ac4e9a203c71cab049fa2d1f4e79dc8b2093` — 애플리케이션 소스(`index.html`/`script.js`/`style.css`) 변경 없음 |
+| B 문서화/증적 커밋 | `58533c7b00f8b785daa082ca126d6b69c9911451` (README/T05_RESULT/xlsx/evidence만 반영; 애플리케이션 소스 포함 안 함) |
 | 시간 / 요청 상한 | 30분 / 5회 (PLAN과 동일) |
 | 실제 작업 요청 | 1회 (사전 준비 대화 제외) |
 | 요청 원문 | `T05_AI_REQUEST_LOG_v1.0.0.xlsx`, AI B 1회차 |
