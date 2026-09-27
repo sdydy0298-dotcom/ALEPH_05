@@ -8,13 +8,13 @@
 | --- | --- |
 | 서비스 / 모델 | ChatGPT / GPT-6 Astra Pro (AI의 식별명; UI 모델 선택·백엔드 버전 ID는 독립 미확인) |
 | 시작 Full Commit | `2b1612fa08ed60cd7d92174cd4fb3a3440c723fc` (첨부 ZIP의 .git HEAD와 일치 확인) |
-| 종료 소스 Full Commit | `A_END_COMMIT_PENDING` |
+| 종료 소스 Full Commit | `5cc2ac4e9a203c71cab049fa2d1f4e79dc8b2093` |
 | 시간 / 요청 상한 | 30분 / 5회 |
 | 실제 작업 요청 | 1회 (사전 준비 대화 제외) |
 | 요청 원문 | `T05_AI_REQUEST_LOG_v1.0.0.xlsx`, AI A 1회차 |
 | PLAN SHA-256 (LF) | `6ab8d5b4eeb7f4adabcf12b1ffe3ea7f79a14e8b805d1a7e4cc646750919e365` |
 | 고정 검사 변경 | 0건; PLAN은 시작 커밋과 바이트기준 일치 |
-| 소스 추가 / 삭제 행 | +A_SOURCE_ADDED_PENDING / -A_SOURCE_DELETED_PENDING (종료 커밋 확정 도구가 채움) |
+| 소스 추가 / 삭제 행 | +542 / -0 (종료 커밋 확정 도구가 채움) |
 
 담당자의 종료 커밋은 아직 생성되지 않았습니다. 파일 적용·커밋 후 `python tools/finalize_handoff.py`로 정확한 버전을 반영하세요. 행 수 비교는 HTML/CSS/JS와 새 Python 검사/인계 도구를 포함하며, 산출된 이미지·검사 결과·문서·Excel·lockfile은 제외합니다. 정확한 대상 경로는 `AI_A_source_manifest.json`에 남겼습니다.
 

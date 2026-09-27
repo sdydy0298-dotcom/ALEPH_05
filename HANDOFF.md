@@ -11,7 +11,7 @@
 | 구분 | 내용 |
 | --- | --- |
 | A 시작 Full Commit ID | `2b1612fa08ed60cd7d92174cd4fb3a3440c723fc` |
-| A 종료 소스 Full Commit ID | `A_END_COMMIT_PENDING` |
+| A 종료 소스 Full Commit ID | `5cc2ac4e9a203c71cab049fa2d1f4e79dc8b2093` |
 | 소스 식별 | `evidence/AI_A_source_manifest.json`의 LF 정규화 SHA-256 |
 | PLAN | 시작 원문 그대로; 변경 없음 |
 | A 요청 | 1/5회; 엑셀의 A 1회차에 실제 원문 기록 |
